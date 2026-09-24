@@ -744,13 +744,9 @@ window.addEventListener(
   "message",
   function(event) {
 
-    /*
- * Accept response only from our hidden Apps Script iframe.
+   /*
+ * Accept the KDR33 Apps Script response.
  */
-
-if (event.source !== attendanceFrame.contentWindow) {
-  return;
-}
 
 
     if (!event.data) {
