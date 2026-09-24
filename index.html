@@ -4,192 +4,190 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>KDR33 Attendance</title>
+<title>KDR33 Clinical Attendance</title>
 
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 
 <style>
-  * {
-    box-sizing: border-box;
-  }
+* {
+  box-sizing: border-box;
+}
 
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f3f6fa;
-    color: #111;
-  }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f3f6fa;
+  color: #111;
+}
 
-  .header {
-    text-align: center;
-    padding: 24px 15px 16px;
-  }
+.header {
+  background: #123b63;
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
 
-  .header h1 {
-    margin: 0;
-    font-size: 32px;
-  }
+.header h1 {
+  margin: 0;
+  font-size: 24px;
+}
 
-  .header p {
-    margin: 6px 0 0;
-    font-size: 20px;
-    color: #555;
-  }
+.header p {
+  margin: 6px 0 0;
+  font-size: 14px;
+}
 
-  .container {
-    max-width: 720px;
-    margin: auto;
-    padding: 0 15px 30px;
-  }
+.container {
+  max-width: 650px;
+  margin: 20px auto;
+  padding: 15px;
+}
 
-  .card {
-    background: white;
-    border-radius: 18px;
-    padding: 22px;
-    margin-bottom: 18px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-  }
+.card {
+  background: white;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.12);
+}
 
-  label {
-    display: block;
-    font-size: 19px;
-    font-weight: bold;
-    margin-bottom: 8px;
-  }
+label {
+  display: block;
+  font-weight: bold;
+  margin-top: 12px;
+  margin-bottom: 6px;
+}
 
-  select {
-    width: 100%;
-    padding: 14px;
-    font-size: 18px;
-    border: 1px solid #bbb;
-    border-radius: 10px;
-    background: white;
-    margin-bottom: 18px;
-  }
+select,
+input,
+button {
+  width: 100%;
+  padding: 13px;
+  font-size: 16px;
+  border-radius: 8px;
+}
 
-  button {
-    width: 100%;
-    border: none;
-    border-radius: 10px;
-    padding: 15px;
-    font-size: 20px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 10px;
-  }
+select,
+input {
+  border: 1px solid #bbb;
+  background: white;
+}
 
-  #startButton {
-    background: #1976d2;
-    color: white;
-  }
+button {
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 12px;
+}
 
-  #stopButton {
-    background: #555;
-    color: white;
-    display: none;
-  }
+.start {
+  background: #123b63;
+  color: white;
+}
 
-  #videoContainer {
-    display: none;
-    position: relative;
-    width: 100%;
-    max-width: 600px;
-    margin: auto;
-    overflow: hidden;
-    border-radius: 14px;
-    background: #000;
-  }
+.stop {
+  background: #777;
+  color: white;
+}
 
-  #video {
-    width: 100%;
-    display: block;
-  }
+.next {
+  background: #198754;
+  color: white;
+}
 
-  #scanCanvas {
-    display: none;
-  }
+#videoContainer {
+  display: none;
+  position: relative;
+  width: 100%;
+  margin-top: 18px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: black;
+}
 
-  .scan-frame {
-    position: absolute;
-    left: 15%;
-    top: 20%;
-    width: 70%;
-    height: 60%;
-    border: 4px solid #00e676;
-    border-radius: 15px;
-    pointer-events: none;
-  }
+#video {
+  display: block;
+  width: 100%;
+}
 
-  .hint {
-    text-align: center;
-    margin-top: 12px;
-    color: #555;
-    font-size: 16px;
-  }
+#scanFrame {
+  position: absolute;
+  left: 10%;
+  top: 20%;
+  width: 80%;
+  height: 60%;
+  border: 4px solid #00e676;
+  border-radius: 18px;
+  pointer-events: none;
+}
 
-  #result {
-    display: none;
-    border-left: 7px solid #1976d2;
-  }
+#scanCanvas {
+  display: none;
+}
 
-  #result.success {
-    border-left-color: #2e7d32;
-  }
+#status {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #eef2f6;
+  font-weight: bold;
+  text-align: center;
+}
 
-  #result.warning {
-    border-left-color: #f57c00;
-  }
+#result {
+  display: none;
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 10px;
+  background: #eaf7ee;
+  border: 1px solid #8ac79b;
+}
 
-  #result.error {
-    border-left-color: #d32f2f;
-  }
+.result-row {
+  margin: 7px 0;
+}
 
-  .result-title {
-    font-size: 25px;
-    font-weight: bold;
-    margin-bottom: 12px;
-  }
+.result-label {
+  font-weight: bold;
+}
 
-  .result-line {
-    font-size: 18px;
-    margin: 6px 0;
-  }
+.error {
+  background: #fdecec !important;
+  border-color: #e09a9a !important;
+}
 
-  .status-large {
-    font-size: 30px;
-    font-weight: bold;
-    margin: 8px 0 14px;
-  }
+.success {
+  background: #eaf7ee !important;
+  border-color: #8ac79b !important;
+}
 
-  .small {
-    font-size: 14px;
-    color: #666;
-  }
+.warning {
+  background: #fff6df !important;
+  border-color: #e3c36b !important;
+}
 
-  .loading {
-    text-align: center;
-    display: none;
-    font-size: 17px;
-    padding: 10px;
-  }
+.small {
+  font-size: 13px;
+  color: #555;
+  margin-top: 8px;
+  text-align: center;
+}
 </style>
 </head>
 
 <body>
 
 <div class="header">
-  <h1>KDR33 Attendance</h1>
-  <p>Clinical Posting Attendance</p>
+  <h1>KDR33 Clinical Attendance</h1>
+  <p>Clinical Posting QR Attendance Scanner</p>
 </div>
 
 <div class="container">
 
   <div class="card">
 
-    <label for="staff">Recorded By</label>
+    <label for="staff">Staff</label>
 
     <select id="staff">
-      <option value="">Select staff</option>
       <option value="ST001">ST001 - STAFF1</option>
       <option value="ST002">ST002 - STAFF2</option>
     </select>
@@ -197,224 +195,288 @@
     <label for="reportingPoint">Reporting Point</label>
 
     <select id="reportingPoint">
-      <option value="">Select reporting point</option>
-      <option value="MU">MU — Block A</option>
-      <option value="MS">MS — Block B</option>
-      <option value="TR">TR — Block C</option>
-      <option value="MRI">MRI — Block D</option>
+      <option value="MU">MU</option>
+      <option value="MS">MS</option>
+      <option value="TR">TR</option>
+      <option value="MRI">MRI</option>
     </select>
 
-  </div>
-
-  <div class="card">
-
-    <button id="startButton" onclick="startCamera()">
-      📷 START CAMERA
+    <button class="start" id="startButton">
+      START CAMERA
     </button>
 
-    <button id="stopButton" onclick="stopCamera()">
-      ■ STOP CAMERA
+    <button class="stop" id="stopButton" style="display:none;">
+      STOP CAMERA
     </button>
 
     <div id="videoContainer">
 
-      <video id="video" autoplay playsinline></video>
+      <video
+        id="video"
+        playsinline
+        autoplay>
+      </video>
 
-      <div class="scan-frame"></div>
+      <div id="scanFrame"></div>
 
-    </div>
-
-    <div class="hint" id="cameraHint">
-      Select staff and reporting point, then start the camera.
     </div>
 
     <canvas id="scanCanvas"></canvas>
 
-  </div>
-
-  <div class="card" id="loading">
-    Recording attendance...
-  </div>
-
-  <div class="card" id="result">
-
-    <div class="result-title" id="resultTitle"></div>
-
-    <div class="status-large" id="resultStatus"></div>
-
-    <div class="result-line">
-      <strong>Student:</strong>
-      <span id="resultStudent"></span>
+    <div id="status">
+      Camera not started.
     </div>
 
-    <div class="result-line">
-      <strong>Student ID:</strong>
-      <span id="resultID"></span>
+    <div class="small">
+      Place the student's QR code inside the green frame.
     </div>
 
-    <div class="result-line">
-      <strong>Department:</strong>
-      <span id="resultDepartment"></span>
+    <div id="result">
+
+      <div class="result-row">
+        <span class="result-label">Message:</span>
+        <span id="resultMessage"></span>
+      </div>
+
+      <div class="result-row">
+        <span class="result-label">Student ID:</span>
+        <span id="studentId"></span>
+      </div>
+
+      <div class="result-row">
+        <span class="result-label">Student:</span>
+        <span id="studentName"></span>
+      </div>
+
+      <div class="result-row">
+        <span class="result-label">Department:</span>
+        <span id="department"></span>
+      </div>
+
+      <div class="result-row">
+        <span class="result-label">Block:</span>
+        <span id="block"></span>
+      </div>
+
+      <div class="result-row">
+        <span class="result-label">Reporting Point:</span>
+        <span id="point"></span>
+      </div>
+
+      <div class="result-row">
+        <span class="result-label">Status:</span>
+        <span id="attendanceStatus"></span>
+      </div>
+
+      <div class="result-row">
+        <span class="result-label">Location Check:</span>
+        <span id="locationCheck"></span>
+      </div>
+
     </div>
 
-    <div class="result-line">
-      <strong>Scheduled Block:</strong>
-      <span id="resultBlock"></span>
-    </div>
-
-    <div class="result-line">
-      <strong>Reporting Point:</strong>
-      <span id="resultPoint"></span>
-    </div>
-
-    <div class="result-line">
-      <strong>Location Check:</strong>
-      <span id="resultLocation"></span>
-    </div>
-
-    <div class="result-line">
-      <strong>Review:</strong>
-      <span id="resultReview"></span>
-    </div>
-
-    <div class="result-line">
-      <strong>Recorded By:</strong>
-      <span id="resultStaff"></span>
-    </div>
-
-    <div class="small" id="resultMessage"></div>
+    <button
+      class="next"
+      id="nextButton"
+      style="display:none;">
+      SCAN NEXT STUDENT
+    </button>
 
   </div>
 
 </div>
 
-<!-- Hidden iframe used to communicate with Apps Script -->
 <iframe
-  name="attendanceResponse"
-  id="attendanceResponse"
+  name="attendanceFrame"
+  id="attendanceFrame"
   style="display:none;">
 </iframe>
 
 <form
   id="attendanceForm"
   method="POST"
-  target="attendanceResponse"
+  target="attendanceFrame"
   style="display:none;">
 
-  <input type="hidden" name="qrId" id="formQR">
-  <input type="hidden" name="reportingPoint" id="formPoint">
-  <input type="hidden" name="staffId" id="formStaff">
-  <input type="hidden" name="remarks" id="formRemarks">
+  <input name="qrId" id="formQrId">
+  <input name="reportingPoint" id="formReportingPoint">
+  <input name="staffId" id="formStaffId">
+  <input name="remarks" id="formRemarks">
 
 </form>
 
 <script>
 
-/* ============================================================
-   KDR33 APPS SCRIPT WEB APP
-   ============================================================ */
+/* =========================================================
+   APPS SCRIPT WEB APP
+   ========================================================= */
 
 const APPS_SCRIPT_URL =
-  "https://script.google.com/a/macros/ummc.edu.my/s/AKfycbzv9OCeZMHdWuHluCUpD33UnyYEd0DP7JaiM6GPCJX-UnvKV3-CE0Mv7zcS-XmrRXeO/exec";
+"https://script.google.com/a/macros/ummc.edu.my/s/AKfycbzv9OCeZMHdWuHluCUpD33UnyYEd0DP7JaiM6GPCJX-UnvKV3-CE0Mv7zcS-XmrRXeO/exec";
 
 
-/* ============================================================
-   CAMERA VARIABLES
-   ============================================================ */
+/* =========================================================
+   ELEMENTS
+   ========================================================= */
 
-let videoStream = null;
+const video =
+  document.getElementById("video");
+
+const videoContainer =
+  document.getElementById("videoContainer");
+
+const canvas =
+  document.getElementById("scanCanvas");
+
+const canvasContext =
+  canvas.getContext("2d", {
+    willReadFrequently: true
+  });
+
+const startButton =
+  document.getElementById("startButton");
+
+const stopButton =
+  document.getElementById("stopButton");
+
+const nextButton =
+  document.getElementById("nextButton");
+
+const statusBox =
+  document.getElementById("status");
+
+const resultBox =
+  document.getElementById("result");
+
+const staffSelect =
+  document.getElementById("staff");
+
+const reportingPointSelect =
+  document.getElementById("reportingPoint");
+
+const attendanceForm =
+  document.getElementById("attendanceForm");
+
+const attendanceFrame =
+  document.getElementById("attendanceFrame");
+
+
+/* =========================================================
+   VARIABLES
+   ========================================================= */
+
+let stream = null;
+
 let scanning = false;
-let processingQR = false;
-let lastQR = "";
-let lastQRTime = 0;
+
+let scanLocked = false;
+
+let animationFrame = null;
 
 
-/* ============================================================
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+function setStatus(message, type = "") {
+
+  statusBox.textContent = message;
+
+  statusBox.className = "";
+
+  if (type === "error") {
+    statusBox.classList.add("error");
+  }
+
+  if (type === "success") {
+    statusBox.classList.add("success");
+  }
+
+  if (type === "warning") {
+    statusBox.classList.add("warning");
+  }
+}
+
+
+/* =========================================================
    START CAMERA
-   ============================================================ */
+   ========================================================= */
 
 async function startCamera() {
 
-  const staff = document.getElementById("staff").value;
-  const point = document.getElementById("reportingPoint").value;
-
-  if (!staff) {
-    showResult(
-      "ERROR",
-      "Please select the staff member.",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "error"
-    );
-    return;
-  }
-
-  if (!point) {
-    showResult(
-      "ERROR",
-      "Please select the reporting point.",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "error"
-    );
-    return;
-  }
-
   try {
 
-    videoStream = await navigator.mediaDevices.getUserMedia({
+    if (!window.isSecureContext) {
+
+      setStatus(
+        "ERROR: Camera requires HTTPS.",
+        "error"
+      );
+
+      return;
+    }
+
+    if (!navigator.mediaDevices ||
+        !navigator.mediaDevices.getUserMedia) {
+
+      setStatus(
+        "ERROR: Camera access is not supported by this browser.",
+        "error"
+      );
+
+      return;
+    }
+
+    setStatus("Starting camera...");
+
+    stream = await navigator.mediaDevices.getUserMedia({
+
       video: {
         facingMode: {
           ideal: "environment"
+        },
+        width: {
+          ideal: 1280
+        },
+        height: {
+          ideal: 720
         }
       },
+
       audio: false
+
     });
 
-    const video = document.getElementById("video");
+    video.srcObject = stream;
 
-    video.srcObject = videoStream;
+    videoContainer.style.display = "block";
+
+    startButton.style.display = "none";
+
+    stopButton.style.display = "block";
+
+    nextButton.style.display = "none";
+
+    resultBox.style.display = "none";
+
+    scanLocked = false;
+
+    scanning = true;
 
     await video.play();
 
-    document.getElementById("videoContainer").style.display = "block";
-
-    document.getElementById("startButton").style.display = "none";
-
-    document.getElementById("stopButton").style.display = "block";
-
-    document.getElementById("cameraHint").textContent =
-      "Point the camera at the student's QR code.";
-
-    scanning = true;
+    setStatus(
+      "Camera active — scanning for QR code..."
+    );
 
     requestAnimationFrame(scanFrame);
 
   } catch (error) {
 
-    showResult(
-      "CAMERA ERROR",
-      error.message || "Unable to access the camera.",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
+    console.error(error);
+
+    setStatus(
+      "Camera error: " + error.message,
       "error"
     );
 
@@ -423,346 +485,453 @@ async function startCamera() {
 }
 
 
-/* ============================================================
+/* =========================================================
    STOP CAMERA
-   ============================================================ */
+   ========================================================= */
 
 function stopCamera() {
 
   scanning = false;
 
-  if (videoStream) {
+  scanLocked = true;
 
-    videoStream.getTracks().forEach(track => {
-      track.stop();
-    });
+  if (animationFrame) {
 
-    videoStream = null;
+    cancelAnimationFrame(animationFrame);
+
+    animationFrame = null;
+
   }
 
-  document.getElementById("video").srcObject = null;
+  if (stream) {
 
-  document.getElementById("videoContainer").style.display = "none";
+    stream.getTracks().forEach(
+      track => track.stop()
+    );
 
-  document.getElementById("startButton").style.display = "block";
+    stream = null;
+  }
 
-  document.getElementById("stopButton").style.display = "none";
+  video.srcObject = null;
 
-  document.getElementById("cameraHint").textContent =
-    "Camera stopped.";
+  videoContainer.style.display = "none";
+
+  startButton.style.display = "block";
+
+  stopButton.style.display = "none";
 
 }
 
 
-/* ============================================================
+/* =========================================================
    QR SCANNING
-   ============================================================ */
+   ========================================================= */
 
 function scanFrame() {
 
-  if (!scanning) return;
+  if (!scanning) {
+    return;
+  }
 
-  const video = document.getElementById("video");
-  const canvas = document.getElementById("scanCanvas");
-  const context = canvas.getContext("2d");
+  if (scanLocked) {
+    return;
+  }
 
-  if (video.readyState === video.HAVE_ENOUGH_DATA) {
+  if (video.readyState !== video.HAVE_ENOUGH_DATA) {
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    animationFrame =
+      requestAnimationFrame(scanFrame);
 
-    context.drawImage(
-      video,
+    return;
+  }
+
+
+  /*
+   * Use the actual camera resolution.
+   */
+
+  const width =
+    video.videoWidth;
+
+  const height =
+    video.videoHeight;
+
+
+  if (!width || !height) {
+
+    animationFrame =
+      requestAnimationFrame(scanFrame);
+
+    return;
+  }
+
+
+  /*
+   * Put the current video frame into canvas.
+   */
+
+  canvas.width = width;
+
+  canvas.height = height;
+
+  canvasContext.drawImage(
+    video,
+    0,
+    0,
+    width,
+    height
+  );
+
+
+  /*
+   * Extract pixel data.
+   */
+
+  const imageData =
+    canvasContext.getImageData(
       0,
       0,
-      canvas.width,
-      canvas.height
+      width,
+      height
     );
 
-    const imageData = context.getImageData(
-      0,
-      0,
-      canvas.width,
-      canvas.height
+
+  /*
+   * Decode QR.
+   */
+
+  if (typeof jsQR !== "function") {
+
+    setStatus(
+      "ERROR: QR decoder did not load.",
+      "error"
     );
 
-    const code = jsQR(
+    return;
+  }
+
+
+  const code =
+    jsQR(
       imageData.data,
       imageData.width,
       imageData.height,
       {
-        inversionAttempts: "dontInvert"
+        inversionAttempts: "attemptBoth"
       }
     );
 
-    if (code && code.data) {
 
-      const now = Date.now();
+  if (code && code.data) {
 
-      if (
-        code.data !== lastQR ||
-        now - lastQRTime > 3000
-      ) {
+    console.log(
+      "QR DETECTED:",
+      code.data
+    );
 
-        lastQR = code.data;
-        lastQRTime = now;
+    handleQRCode(code.data);
 
-        submitAttendance(code.data);
-      }
-
-    }
-
+    return;
   }
 
-  requestAnimationFrame(scanFrame);
 
+  /*
+   * Continue scanning.
+   */
+
+  animationFrame =
+    requestAnimationFrame(scanFrame);
 }
 
 
-/* ============================================================
+/* =========================================================
+   QR DETECTED
+   ========================================================= */
+
+function handleQRCode(qrData) {
+
+  if (scanLocked) {
+    return;
+  }
+
+  scanLocked = true;
+
+  const qrId =
+    String(qrData).trim();
+
+  setStatus(
+    "QR DETECTED: " + qrId,
+    "success"
+  );
+
+  submitAttendance(qrId);
+}
+
+
+/* =========================================================
    SUBMIT ATTENDANCE
-   ============================================================ */
+   ========================================================= */
 
 function submitAttendance(qrId) {
 
-  if (processingQR) return;
+  const staffId =
+    staffSelect.value;
 
-  processingQR = true;
-
-  const staff =
-    document.getElementById("staff").value;
-
-  const point =
-    document.getElementById("reportingPoint").value;
-
-  document.getElementById("loading").style.display =
-    "block";
-
-  document.getElementById("result").style.display =
-    "none";
+  const reportingPoint =
+    reportingPointSelect.value;
 
 
-  document.getElementById("formQR").value =
-    qrId;
+  /*
+   * Fill hidden form.
+   */
 
-  document.getElementById("formPoint").value =
-    point;
+  document.getElementById(
+    "formQrId"
+  ).value = qrId;
 
-  document.getElementById("formStaff").value =
-    staff;
+  document.getElementById(
+    "formReportingPoint"
+  ).value = reportingPoint;
 
-  document.getElementById("formRemarks").value =
-    "";
+  document.getElementById(
+    "formStaffId"
+  ).value = staffId;
+
+  document.getElementById(
+    "formRemarks"
+  ).value = "";
 
 
-  document.getElementById("attendanceForm").action =
+  setStatus(
+    "QR detected. Recording attendance..."
+  );
+
+
+  /*
+   * Submit to Apps Script.
+   */
+
+  attendanceForm.action =
     APPS_SCRIPT_URL;
 
+  attendanceForm.submit();
 
-  document.getElementById("attendanceForm").submit();
+
+  /*
+   * Wait for Apps Script response.
+   */
+
+  setTimeout(function() {
+
+    if (scanLocked) {
+
+      setStatus(
+        "Attendance request sent. Waiting for response..."
+      );
+
+    }
+
+  }, 500);
 
 }
 
 
-/* ============================================================
-   RECEIVE RESPONSE FROM APPS SCRIPT
-   ============================================================ */
+/* =========================================================
+   APPS SCRIPT RESPONSE
+   ========================================================= */
 
-window.addEventListener("message", function(event) {
+window.addEventListener(
+  "message",
+  function(event) {
 
-  if (
-    event.origin !==
-    "https://script.google.com"
-  ) {
-    return;
+    /*
+     * Accept only Google Apps Script origins.
+     */
+
+    const allowedOrigins = [
+      "https://script.google.com",
+      "https://script.googleusercontent.com"
+    ];
+
+    if (!allowedOrigins.includes(event.origin)) {
+      return;
+    }
+
+
+    if (!event.data) {
+      return;
+    }
+
+
+    if (
+      event.data.type !==
+      "KDR33_ATTENDANCE_RESULT"
+    ) {
+      return;
+    }
+
+
+    const result =
+      event.data.result;
+
+
+    if (!result) {
+      return;
+    }
+
+
+    displayResult(result);
+
   }
-
-  if (
-    !event.data ||
-    event.data.type !==
-    "KDR33_ATTENDANCE_RESULT"
-  ) {
-    return;
-  }
-
-  const result = event.data.result;
-
-  document.getElementById("loading").style.display =
-    "none";
-
-  processingQR = false;
-
-  handleAttendanceResult(result);
-
-});
+);
 
 
-/* ============================================================
-   HANDLE RESULT
-   ============================================================ */
+/* =========================================================
+   DISPLAY RESULT
+   ========================================================= */
 
-function handleAttendanceResult(result) {
+function displayResult(result) {
 
-  if (!result) {
+  resultBox.style.display = "block";
 
-    showResult(
-      "ERROR",
-      "No response received from attendance system.",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "error"
-    );
-
-    return;
-  }
-
-
-  if (result.success === false) {
-
-    showResult(
-      "ERROR",
-      result.message || "Attendance could not be recorded.",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "error"
-    );
-
-    return;
-  }
-
-
-  const studentName =
-    result.studentName || "";
-
-  const studentID =
-    result.studentId || "";
-
-  const department =
-    result.department || "";
-
-  const block =
-    result.block || "";
-
-  const reportingPoint =
-    result.reportingPoint || "";
-
-  const locationCheck =
-    result.locationCheck || "";
-
-  const review =
-    result.review || "";
-
-  const status =
-    result.status || "";
-
-  const recordedBy =
-    result.recordedBy || "";
-
-  const message =
+  document.getElementById(
+    "resultMessage"
+  ).textContent =
     result.message || "";
 
 
-  let resultClass = "success";
+  document.getElementById(
+    "studentId"
+  ).textContent =
+    result.studentId || "";
 
-  if (
-    status === "LATE" ||
-    locationCheck === "MISMATCH" ||
-    review === "PENDING REVIEW"
-  ) {
-    resultClass = "warning";
+
+  document.getElementById(
+    "studentName"
+  ).textContent =
+    result.studentName || "";
+
+
+  document.getElementById(
+    "department"
+  ).textContent =
+    result.department || "";
+
+
+  document.getElementById(
+    "block"
+  ).textContent =
+    result.block || "";
+
+
+  document.getElementById(
+    "point"
+  ).textContent =
+    result.reportingPoint || "";
+
+
+  document.getElementById(
+    "attendanceStatus"
+  ).textContent =
+    result.status || "";
+
+
+  document.getElementById(
+    "locationCheck"
+  ).textContent =
+    result.locationCheck || "";
+
+
+  if (result.success) {
+
+    setStatus(
+      result.message ||
+      "Attendance recorded successfully.",
+      "success"
+    );
+
+  } else {
+
+    setStatus(
+      result.message ||
+      "Attendance could not be recorded.",
+      "error"
+    );
+
   }
 
 
-  showResult(
-    "ATTENDANCE",
-    status,
-    studentName,
-    studentID,
-    department,
-    block,
-    reportingPoint,
-    locationCheck,
-    review,
-    recordedBy,
-    resultClass,
-    message
-  );
+  /*
+   * Stop camera after a successful scan.
+   */
+
+  stopCamera();
+
+  nextButton.style.display = "block";
 
 }
 
 
-/* ============================================================
-   DISPLAY RESULT
-   ============================================================ */
+/* =========================================================
+   SCAN NEXT STUDENT
+   ========================================================= */
 
-function showResult(
-  title,
-  status,
-  studentName,
-  studentID,
-  department,
-  block,
-  reportingPoint,
-  locationCheck,
-  review,
-  recordedBy,
-  cssClass,
-  message
-) {
+nextButton.addEventListener(
+  "click",
+  function() {
 
-  const box =
-    document.getElementById("result");
+    resultBox.style.display = "none";
 
-  box.className =
-    "card " + (cssClass || "");
+    nextButton.style.display = "none";
 
-  box.style.display =
-    "block";
+    scanLocked = false;
 
-  document.getElementById("resultTitle").textContent =
-    title;
+    startCamera();
 
-  document.getElementById("resultStatus").textContent =
-    status;
+  }
+);
 
-  document.getElementById("resultStudent").textContent =
-    studentName;
 
-  document.getElementById("resultID").textContent =
-    studentID;
+/* =========================================================
+   BUTTONS
+   ========================================================= */
 
-  document.getElementById("resultDepartment").textContent =
-    department;
+startButton.addEventListener(
+  "click",
+  startCamera
+);
 
-  document.getElementById("resultBlock").textContent =
-    block;
+stopButton.addEventListener(
+  "click",
+  function() {
 
-  document.getElementById("resultPoint").textContent =
-    reportingPoint;
+    stopCamera();
 
-  document.getElementById("resultLocation").textContent =
-    locationCheck;
+    setStatus(
+      "Camera stopped."
+    );
 
-  document.getElementById("resultReview").textContent =
-    review;
+  }
+);
 
-  document.getElementById("resultStaff").textContent =
-    recordedBy;
 
-  document.getElementById("resultMessage").textContent =
-    message || "";
+/* =========================================================
+   INITIAL STATUS
+   ========================================================= */
+
+if (typeof jsQR === "function") {
+
+  setStatus(
+    "Ready. Select reporting point and start camera."
+  );
+
+} else {
+
+  setStatus(
+    "WARNING: QR decoder is still loading. Please refresh the page.",
+    "warning"
+  );
+
 }
 
 </script>
