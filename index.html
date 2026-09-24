@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>KDR33 Attendance</title>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f3f6fa;
+    color: #111;
+  }
+
+  .header {
+    text-align: center;
+    padding: 24px 15px 16px;
+  }
+
+  .header h1 {
+    margin: 0;
+    font-size: 32px;
+  }
+
+  .header p {
+    margin: 6px 0 0;
+    font-size: 20px;
+    color: #555;
+  }
+
+  .container {
+    max-width: 720px;
+    margin: auto;
+    padding: 0 15px 30px;
+  }
+
+  .card {
+    background: white;
+    border-radius: 18px;
+    padding: 22px;
+    margin-bottom: 18px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  }
+
+  label {
+    display: block;
+    font-size: 19px;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+
+  select {
+    width: 100%;
+    padding: 14px;
+    font-size: 18px;
+    border: 1px solid #bbb;
+    border-radius: 10px;
+    background: white;
+    margin-bottom: 18px;
+  }
+
+  button {
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    padding: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+
+  #startButton {
+    background: #1976d2;
+    color: white;
+  }
+
+  #stopButton {
+    background: #555;
+    color: white;
+    display: none;
+  }
+
+  #videoContainer {
+    display: none;
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: auto;
+    overflow: hidden;
+    border-radius: 14px;
+    background: #000;
+  }
+
+  #video {
+    width: 100%;
+    display: block;
+  }
+
+  #scanCanvas {
+    display: none;
+  }
+
+  .scan-frame {
+    position: absolute;
+    left: 15%;
+    top: 20%;
+    width: 70%;
+    height: 60%;
+    border: 4px solid #00e676;
+    border-radius: 15px;
+    pointer-events: none;
+  }
+
+  .hint {
+    text-align: center;
+    margin-top: 12px;
+    color: #555;
+    font-size: 16px;
+  }
+
+  #result {
+    display: none;
+    border-left: 7px solid #1976d2;
+  }
+
+  #result.success {
+    border-left-color: #2e7d32;
+  }
+
+  #result.warning {
+    border-left-color: #f57c00;
+  }
+
+  #result.error {
+    border-left-color: #d32f2f;
+  }
+
+  .result-title {
+    font-size: 25px;
+    font-weight: bold;
+    margin-bottom: 12px;
+  }
+
+  .result-line {
+    font-size: 18px;
+    margin: 6px 0;
+  }
+
+  .status-large {
+    font-size: 30px;
+    font-weight: bold;
+    margin: 8px 0 14px;
+  }
+
+  .small {
+    font-size: 14px;
+    color: #666;
+  }
+
+  .loading {
+    text-align: center;
+    display: none;
+    font-size: 17px;
+    padding: 10px;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <h1>KDR33 Attendance</h1>
+  <p>Clinical Posting Attendance</p>
+</div>
+
+<div class="container">
+
+  <div class="card">
+
+    <label for="staff">Recorded By</label>
+
+    <select id="staff">
+      <option value="">Select staff</option>
+      <option value="ST001">ST001 - STAFF1</option>
+      <option value="ST002">ST002 - STAFF2</option>
+    </select>
+
+    <label for="reportingPoint">Reporting Point</label>
+
+    <select id="reportingPoint">
+      <option value="">Select reporting point</option>
+      <option value="MU">MU — Block A</option>
+      <option value="MS">MS — Block B</option>
+      <option value="TR">TR — Block C</option>
+      <option value="MRI">MRI — Block D</option>
+    </select>
+
+  </div>
+
+  <div class="card">
+
+    <button id="startButton" onclick="startCamera()">
+      📷 START CAMERA
+    </button>
+
+    <button id="stopButton" onclick="stopCamera()">
+      ■ STOP CAMERA
+    </button>
+
+    <div id="videoContainer">
+
+      <video id="video" autoplay playsinline></video>
+
+      <div class="scan-frame"></div>
+
+    </div>
+
+    <div class="hint" id="cameraHint">
+      Select staff and reporting point, then start the camera.
+    </div>
+
+    <canvas id="scanCanvas"></canvas>
+
+  </div>
+
+  <div class="card" id="loading">
+    Recording attendance...
+  </div>
+
+  <div class="card" id="result">
+
+    <div class="result-title" id="resultTitle"></div>
+
+    <div class="status-large" id="resultStatus"></div>
+
+    <div class="result-line">
+      <strong>Student:</strong>
+      <span id="resultStudent"></span>
+    </div>
+
+    <div class="result-line">
+      <strong>Student ID:</strong>
+      <span id="resultID"></span>
+    </div>
+
+    <div class="result-line">
+      <strong>Department:</strong>
+      <span id="resultDepartment"></span>
+    </div>
+
+    <div class="result-line">
+      <strong>Scheduled Block:</strong>
+      <span id="resultBlock"></span>
+    </div>
+
+    <div class="result-line">
+      <strong>Reporting Point:</strong>
+      <span id="resultPoint"></span>
+    </div>
+
+    <div class="result-line">
+      <strong>Location Check:</strong>
+      <span id="resultLocation"></span>
+    </div>
+
+    <div class="result-line">
+      <strong>Review:</strong>
+      <span id="resultReview"></span>
+    </div>
+
+    <div class="result-line">
+      <strong>Recorded By:</strong>
+      <span id="resultStaff"></span>
+    </div>
+
+    <div class="small" id="resultMessage"></div>
+
+  </div>
+
+</div>
+
+<!-- Hidden iframe used to communicate with Apps Script -->
+<iframe
+  name="attendanceResponse"
+  id="attendanceResponse"
+  style="display:none;">
+</iframe>
+
+<form
+  id="attendanceForm"
+  method="POST"
+  target="attendanceResponse"
+  style="display:none;">
+
+  <input type="hidden" name="qrId" id="formQR">
+  <input type="hidden" name="reportingPoint" id="formPoint">
+  <input type="hidden" name="staffId" id="formStaff">
+  <input type="hidden" name="remarks" id="formRemarks">
+
+</form>
+
+<script>
+
+/* ============================================================
+   KDR33 APPS SCRIPT WEB APP
+   ============================================================ */
+
+const APPS_SCRIPT_URL =
+  "https://script.google.com/a/macros/ummc.edu.my/s/AKfycbzv9OCeZMHdWuHluCUpD33UnyYEd0DP7JaiM6GPCJX-UnvKV3-CE0Mv7zcS-XmrRXeO/exec";
+
+
+/* ============================================================
+   CAMERA VARIABLES
+   ============================================================ */
+
+let videoStream = null;
+let scanning = false;
+let processingQR = false;
+let lastQR = "";
+let lastQRTime = 0;
+
+
+/* ============================================================
+   START CAMERA
+   ============================================================ */
+
+async function startCamera() {
+
+  const staff = document.getElementById("staff").value;
+  const point = document.getElementById("reportingPoint").value;
+
+  if (!staff) {
+    showResult(
+      "ERROR",
+      "Please select the staff member.",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "error"
+    );
+    return;
+  }
+
+  if (!point) {
+    showResult(
+      "ERROR",
+      "Please select the reporting point.",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "error"
+    );
+    return;
+  }
+
+  try {
+
+    videoStream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: {
+          ideal: "environment"
+        }
+      },
+      audio: false
+    });
+
+    const video = document.getElementById("video");
+
+    video.srcObject = videoStream;
+
+    await video.play();
+
+    document.getElementById("videoContainer").style.display = "block";
+
+    document.getElementById("startButton").style.display = "none";
+
+    document.getElementById("stopButton").style.display = "block";
+
+    document.getElementById("cameraHint").textContent =
+      "Point the camera at the student's QR code.";
+
+    scanning = true;
+
+    requestAnimationFrame(scanFrame);
+
+  } catch (error) {
+
+    showResult(
+      "CAMERA ERROR",
+      error.message || "Unable to access the camera.",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "error"
+    );
+
+  }
+
+}
+
+
+/* ============================================================
+   STOP CAMERA
+   ============================================================ */
+
+function stopCamera() {
+
+  scanning = false;
+
+  if (videoStream) {
+
+    videoStream.getTracks().forEach(track => {
+      track.stop();
+    });
+
+    videoStream = null;
+  }
+
+  document.getElementById("video").srcObject = null;
+
+  document.getElementById("videoContainer").style.display = "none";
+
+  document.getElementById("startButton").style.display = "block";
+
+  document.getElementById("stopButton").style.display = "none";
+
+  document.getElementById("cameraHint").textContent =
+    "Camera stopped.";
+
+}
+
+
+/* ============================================================
+   QR SCANNING
+   ============================================================ */
+
+function scanFrame() {
+
+  if (!scanning) return;
+
+  const video = document.getElementById("video");
+  const canvas = document.getElementById("scanCanvas");
+  const context = canvas.getContext("2d");
+
+  if (video.readyState === video.HAVE_ENOUGH_DATA) {
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    context.drawImage(
+      video,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    const imageData = context.getImageData(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    const code = jsQR(
+      imageData.data,
+      imageData.width,
+      imageData.height,
+      {
+        inversionAttempts: "dontInvert"
+      }
+    );
+
+    if (code && code.data) {
+
+      const now = Date.now();
+
+      if (
+        code.data !== lastQR ||
+        now - lastQRTime > 3000
+      ) {
+
+        lastQR = code.data;
+        lastQRTime = now;
+
+        submitAttendance(code.data);
+      }
+
+    }
+
+  }
+
+  requestAnimationFrame(scanFrame);
+
+}
+
+
+/* ============================================================
+   SUBMIT ATTENDANCE
+   ============================================================ */
+
+function submitAttendance(qrId) {
+
+  if (processingQR) return;
+
+  processingQR = true;
+
+  const staff =
+    document.getElementById("staff").value;
+
+  const point =
+    document.getElementById("reportingPoint").value;
+
+  document.getElementById("loading").style.display =
+    "block";
+
+  document.getElementById("result").style.display =
+    "none";
+
+
+  document.getElementById("formQR").value =
+    qrId;
+
+  document.getElementById("formPoint").value =
+    point;
+
+  document.getElementById("formStaff").value =
+    staff;
+
+  document.getElementById("formRemarks").value =
+    "";
+
+
+  document.getElementById("attendanceForm").action =
+    APPS_SCRIPT_URL;
+
+
+  document.getElementById("attendanceForm").submit();
+
+}
+
+
+/* ============================================================
+   RECEIVE RESPONSE FROM APPS SCRIPT
+   ============================================================ */
+
+window.addEventListener("message", function(event) {
+
+  if (
+    event.origin !==
+    "https://script.google.com"
+  ) {
+    return;
+  }
+
+  if (
+    !event.data ||
+    event.data.type !==
+    "KDR33_ATTENDANCE_RESULT"
+  ) {
+    return;
+  }
+
+  const result = event.data.result;
+
+  document.getElementById("loading").style.display =
+    "none";
+
+  processingQR = false;
+
+  handleAttendanceResult(result);
+
+});
+
+
+/* ============================================================
+   HANDLE RESULT
+   ============================================================ */
+
+function handleAttendanceResult(result) {
+
+  if (!result) {
+
+    showResult(
+      "ERROR",
+      "No response received from attendance system.",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "error"
+    );
+
+    return;
+  }
+
+
+  if (result.success === false) {
+
+    showResult(
+      "ERROR",
+      result.message || "Attendance could not be recorded.",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "error"
+    );
+
+    return;
+  }
+
+
+  const studentName =
+    result.studentName || "";
+
+  const studentID =
+    result.studentId || "";
+
+  const department =
+    result.department || "";
+
+  const block =
+    result.block || "";
+
+  const reportingPoint =
+    result.reportingPoint || "";
+
+  const locationCheck =
+    result.locationCheck || "";
+
+  const review =
+    result.review || "";
+
+  const status =
+    result.status || "";
+
+  const recordedBy =
+    result.recordedBy || "";
+
+  const message =
+    result.message || "";
+
+
+  let resultClass = "success";
+
+  if (
+    status === "LATE" ||
+    locationCheck === "MISMATCH" ||
+    review === "PENDING REVIEW"
+  ) {
+    resultClass = "warning";
+  }
+
+
+  showResult(
+    "ATTENDANCE",
+    status,
+    studentName,
+    studentID,
+    department,
+    block,
+    reportingPoint,
+    locationCheck,
+    review,
+    recordedBy,
+    resultClass,
+    message
+  );
+
+}
+
+
+/* ============================================================
+   DISPLAY RESULT
+   ============================================================ */
+
+function showResult(
+  title,
+  status,
+  studentName,
+  studentID,
+  department,
+  block,
+  reportingPoint,
+  locationCheck,
+  review,
+  recordedBy,
+  cssClass,
+  message
+) {
+
+  const box =
+    document.getElementById("result");
+
+  box.className =
+    "card " + (cssClass || "");
+
+  box.style.display =
+    "block";
+
+  document.getElementById("resultTitle").textContent =
+    title;
+
+  document.getElementById("resultStatus").textContent =
+    status;
+
+  document.getElementById("resultStudent").textContent =
+    studentName;
+
+  document.getElementById("resultID").textContent =
+    studentID;
+
+  document.getElementById("resultDepartment").textContent =
+    department;
+
+  document.getElementById("resultBlock").textContent =
+    block;
+
+  document.getElementById("resultPoint").textContent =
+    reportingPoint;
+
+  document.getElementById("resultLocation").textContent =
+    locationCheck;
+
+  document.getElementById("resultReview").textContent =
+    review;
+
+  document.getElementById("resultStaff").textContent =
+    recordedBy;
+
+  document.getElementById("resultMessage").textContent =
+    message || "";
+}
+
+</script>
+
+</body>
+</html>
