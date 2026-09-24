@@ -745,17 +745,12 @@ window.addEventListener(
   function(event) {
 
     /*
-     * Accept only Google Apps Script origins.
-     */
+ * Accept response only from our hidden Apps Script iframe.
+ */
 
-    const allowedOrigins = [
-      "https://script.google.com",
-      "https://script.googleusercontent.com"
-    ];
-
-    if (!allowedOrigins.includes(event.origin)) {
-      return;
-    }
+if (event.source !== attendanceFrame.contentWindow) {
+  return;
+}
 
 
     if (!event.data) {
